@@ -1,53 +1,50 @@
 CREATE TABLE `country` (
-  `country_id` int PRIMARY KEY,
+  `country_id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) UNIQUE NOT NULL,
   `code` varchar(255) UNIQUE NOT NULL
 );
 
 CREATE TABLE `city` (
-  `city_id` int PRIMARY KEY,
+  `city_id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) UNIQUE NOT NULL,
   `country_id` int NOT NULL
 );
 
 CREATE TABLE `hotel` (
-  `hotel_id` int PRIMARY KEY,
+  `hotel_id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `city_id` int NOT NULL,
-  `rating` double,
-  `price` double NOT NULL DEFAULT 0
+  `rating` double
 );
 
-CREATE TABLE `flight` (
-  `flight_id` int PRIMARY KEY,
-  `departure_city_id` int NOT NULL,
-  `arrival_city_id` int NOT NULL,
+CREATE TABLE `city_transport` (
+  `city_transport_id` int PRIMARY KEY AUTO_INCREMENT,
+  `city_departure_id` int NOT NULL,
+  `city_arrival_id` int NOT NULL,
   `price` double NOT NULL,
   `departure_time` datetime NOT NULL,
-  `arrival_time` datetime NOT NULL
+  `arrival_time` datetime NOT NULL,
+  `transport_id` int NOT NULL
 );
 
 CREATE TABLE `user` (
-  `user_id` int PRIMARY KEY,
-  `first_name` varchar(255) NOT NULL,
-  `last_name` varchar(255) NOT NULL,
-  `email` varchar(255) UNIQUE NOT NULL,
-  `password` varchar(255) NOT NULL
+  `user_id` int PRIMARY KEY AUTO_INCREMENT,
+  `login` varchar(255) UNIQUE NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `status` varchar(255) NOT NULL
 );
 
-CREATE TABLE `visa` (
-  `visa_id` int PRIMARY KEY,
-  `user_id` int NOT NULL,
-  `valid_from` date NOT NULL,
-  `valid_to` date NOT NULL
+CREATE TABLE `transport` (
+  `transport_id` int PRIMARY KEY AUTO_INCREMENT,
+  `name` varchar(255) UNIQUE NOT NULL
 );
 
 ALTER TABLE `city` ADD FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`);
 
 ALTER TABLE `hotel` ADD FOREIGN KEY (`city_id`) REFERENCES `city` (`city_id`);
 
-ALTER TABLE `flight` ADD FOREIGN KEY (`departure_city_id`) REFERENCES `city` (`city_id`);
+ALTER TABLE `city_transport` ADD FOREIGN KEY (`city_departure_id`) REFERENCES `city` (`city_id`);
 
-ALTER TABLE `flight` ADD FOREIGN KEY (`arrival_city_id`) REFERENCES `city` (`city_id`);
+ALTER TABLE `city_transport` ADD FOREIGN KEY (`city_arrival_id`) REFERENCES `city` (`city_id`);
 
-ALTER TABLE `visa` ADD FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
+ALTER TABLE `city_transport` ADD FOREIGN KEY (`transport_id`) REFERENCES `transport` (`transport_id`);

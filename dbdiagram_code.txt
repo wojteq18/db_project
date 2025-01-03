@@ -1,43 +1,40 @@
 Table country {
-  country_id int [primary key]  // Klucz główny
+  country_id int [primary key, increment]  // Klucz główny
   name varchar [not null, unique]  // Nazwa kraju (unikatowa)
   code varchar [not null, unique]  // Kod kraju (np. POL, USA)
 }
 
 Table city {
-  city_id int [primary key]
+  city_id int [primary key, increment]
   name varchar [not null, unique]
   country_id int [not null, ref: > country.country_id]
 }
 
 Table hotel {
-  hotel_id int [primary key]
+  hotel_id int [primary key, increment]
   name varchar [not null]
   city_id int [not null, ref: > city.city_id]
   rating double
-  price double [not null, default: 0]
 }
 
-Table flight {
-  flight_id int [primary key]
-  departure_city_id int [not null, ref: > city.city_id]
-  arrival_city_id int [not null, ref: > city.city_id]
+Table city_transport {
+  city_transport_id int [primary key, increment]
+  city_departure_id int [not null, ref: > city.city_id]
+  city_arrival_id int [not null, ref: > city.city_id]
   price double [not null]
   departure_time datetime [not null]
   arrival_time datetime [not null]
+  transport_id int [not null, ref: > transport.transport_id]
 }
 
 Table user {
-  user_id int [primary key]
-  first_name varchar [not null]
-  last_name varchar [not null]
-  email varchar [unique, not null]
+  user_id int [primary key, increment]
+  login varchar [not null, unique]
   password varchar [not null]
+  status varchar [not null]
 }
 
-Table visa {
-  visa_id int [primary key]
-  user_id int [not null, ref: > user.user_id]
-  valid_from date [not null]
-  valid_to date [not null]
+Table transport {
+  transport_id int [primary key, increment]
+  name varchar [not null, unique]
 }

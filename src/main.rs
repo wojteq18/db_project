@@ -11,10 +11,10 @@ fn main() -> Result<()> {
     let mut conn = pool.get_conn()?;
 
     let new_user = User::new(
-        "Jan",
+        "Marian",
         "Kowalski",
-        "jankowalski@gmail.com",
-        "password"
+        "mariankowalski@gmail.com",
+        "password123"
     );
 
     new_user.add_user(&mut conn)?;
