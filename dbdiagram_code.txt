@@ -1,0 +1,43 @@
+Table country {
+  country_id int [primary key]  // Klucz główny
+  name varchar [not null, unique]  // Nazwa kraju (unikatowa)
+  code varchar [not null, unique]  // Kod kraju (np. POL, USA)
+}
+
+Table city {
+  city_id int [primary key]
+  name varchar [not null, unique]
+  country_id int [not null, ref: > country.country_id]
+}
+
+Table hotel {
+  hotel_id int [primary key]
+  name varchar [not null]
+  city_id int [not null, ref: > city.city_id]
+  rating double
+  price double [not null, default: 0]
+}
+
+Table flight {
+  flight_id int [primary key]
+  departure_city_id int [not null, ref: > city.city_id]
+  arrival_city_id int [not null, ref: > city.city_id]
+  price double [not null]
+  departure_time datetime [not null]
+  arrival_time datetime [not null]
+}
+
+Table user {
+  user_id int [primary key]
+  first_name varchar [not null]
+  last_name varchar [not null]
+  email varchar [unique, not null]
+  password varchar [not null]
+}
+
+Table visa {
+  visa_id int [primary key]
+  user_id int [not null, ref: > user.user_id]
+  valid_from date [not null]
+  valid_to date [not null]
+}
