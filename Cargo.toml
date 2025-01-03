@@ -8,3 +8,4 @@ mysql = "23.0"
 tokio = { version = "1", features = ["full"] }
 eframe = "0.26"   # GUI (egui)
 serde = { version = "1.0", features = ["derive"] }
+dotenvy = "0.15"
