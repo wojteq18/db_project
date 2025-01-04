@@ -12,13 +12,7 @@ fn main() -> Result<()> {
     let pool = connect_to_db()?;
     let mut conn = pool.get_conn()?;
 
-    /*let new_user = User::new(
-        "Marian",
-        "Kowalski",
-        "mariankowalski@gmail.com",
-        "password123"
-    );*/
-
-    //new_user.add_user(&mut conn)?;
+    let country = Country::new("South Korea", "SK");
+    country.add_country(&mut conn)?;
     Ok(())
 }

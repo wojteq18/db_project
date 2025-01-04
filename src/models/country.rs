@@ -5,33 +5,35 @@ use mysql::prelude::Queryable;
 #[derive(Debug, PartialEq, Eq)]
 pub struct Country {
     pub country_id: i32,
-    pub country_name: String,
+    pub name: String,
+    pub code: String,
 }
 
 impl Country {
-    pub fn new(country_name: &str) -> Self {
+    pub fn new(name: &str, code: &str) -> Self {
         Country {
-            country_id: 0, //domyslnie 0, do nadpisania pozniej
-            country_name: country_name.to_owned(),
+            country_id: 0, // Domyślnie 0, do nadpisania później
+            name: name.to_owned(),
+            code: code.to_owned(),
         }
     }
 
     pub fn add_country(&self, conn: &mut PooledConn) -> Result<(), mysql::Error> {
         let exists: Option<String> = conn.exec_first(
-            "SELECT city_name FROM city WHERE city_name = :city_name AND country_id = :country_id",
+            "SELECT name FROM country WHERE name = :name OR code = :code",
             params! {
-                "country_name" => &self.country_name,
-                "country_id" => &self.country_id,
+                "name" => &self.name,
+                "code" => &self.code,
             },
         )?;
     
         if exists.is_none() {
             conn.exec_drop(
-                r"INSERT INTO city (city_name, country_id)
-                VALUES (:city_name, :country_id)",
+                r"INSERT INTO country (name, code)
+                VALUES (:name, :code)",
                 params! {
-                    "city_name" => &self.country_name,
-                    "country_id" => &self.country_id,
+                    "name" => &self.name,
+                    "code" => &self.code,
                 }
             )?;
         } else {
@@ -42,10 +44,10 @@ impl Country {
 
     pub fn remove_country(&self, conn: &mut PooledConn) -> Result<(), mysql::Error> {
         conn.exec_drop(
-            r"DELETE FROM country WHERE country_name = :country_name AND country_id = :country_id",
+            r"DELETE FROM country WHERE name = :name AND code = :code",
             params! {
-                "country_name" => &self.country_name,
-                "country_id" => &self.country_id,
+                "name" => &self.name,
+                "code" => &self.code,
             }
         )?;
         Ok(())
