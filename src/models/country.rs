@@ -10,6 +10,17 @@ pub struct Country {
 }
 
 impl Country {
+    pub fn country_exists(conn: &mut PooledConn, name: &str, code: &str) -> bool {
+        let exists: Option<String> = conn.exec_first(
+            "SELECT name FROM country WHERE name = :name OR code = :code",
+            params! {
+                "name" => name,
+                "code" => code,
+            },
+        ).unwrap_or(None);
+        exists.is_some()
+    }
+
     pub fn new(name: &str, code: &str) -> Self {
         Country {
             country_id: 0, // Domyślnie 0, do nadpisania później
@@ -19,15 +30,7 @@ impl Country {
     }
 
     pub fn add_country(&self, conn: &mut PooledConn) -> Result<(), mysql::Error> {
-        let exists: Option<String> = conn.exec_first(
-            "SELECT name FROM country WHERE name = :name OR code = :code",
-            params! {
-                "name" => &self.name,
-                "code" => &self.code,
-            },
-        )?;
-    
-        if exists.is_none() {
+        if Self::country_exists(conn, &self.name, &self.code) == false {
             conn.exec_drop(
                 r"INSERT INTO country (name, code)
                 VALUES (:name, :code)",
@@ -36,20 +39,26 @@ impl Country {
                     "code" => &self.code,
                 }
             )?;
+            println!("Country '{}' added successfully!", &self.name);
         } else {
-            println!("Country already exists!");
+            println!("Country '{}' already exists!", &self.name);
         }
         Ok(())
     }  
 
     pub fn remove_country(&self, conn: &mut PooledConn) -> Result<(), mysql::Error> {
-        conn.exec_drop(
-            r"DELETE FROM country WHERE name = :name AND code = :code",
-            params! {
-                "name" => &self.name,
-                "code" => &self.code,
-            }
-        )?;
-        Ok(())
+        if Self::country_exists(conn, &self.name, &self.code) == true {
+            conn.exec_drop(
+                r"DELETE FROM country WHERE name = :name AND code = :code",
+                params! {
+                    "name" => &self.name,
+                    "code" => &self.code,
+                }
+            )?;
+            println!("Country '{}' removed successfully!", &self.name);
+        } else {
+            println!("Country '{}' does not exist!", &self.name);
+        }
+     Ok(())
     }
 }

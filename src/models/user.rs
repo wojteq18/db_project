@@ -11,7 +11,6 @@ pub struct User {
 }
 
 impl User {
-
     // Sprawdzenie, czy użytkownik istnieje w bazie
     pub fn user_exists(conn: &mut PooledConn, login: &str) -> bool {
         let exists: Option<String> = conn.exec_first(
