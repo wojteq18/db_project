@@ -1,6 +1,7 @@
 use mysql::params;
 use mysql::PooledConn;
 use mysql::prelude::Queryable;
+use bcrypt::{hash, DEFAULT_COST};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct User {
@@ -25,10 +26,15 @@ impl User {
 
     // Konstruktor nowego użytkownika
     pub fn new(login: &str, password: &str, status: &str) -> Self {
+        let hashed_password = match hash(password, DEFAULT_COST) {
+            Ok(h) => h,
+            Err(_) => panic!("Failed to hash password"),
+        };
+
         User {
             user_id: 0,
             login: login.to_owned(),
-            password: password.to_owned(),
+            password: hashed_password,
             status: status.to_owned(),
         }
     }

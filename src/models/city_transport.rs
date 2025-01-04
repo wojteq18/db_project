@@ -3,7 +3,7 @@ use mysql::PooledConn;
 use mysql::prelude::Queryable;
 use chrono::NaiveDateTime;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub struct City_transport {
     pub city_transport_id: i32,
     pub city_departure_id: i32,
@@ -28,7 +28,8 @@ impl City_transport {
             JOIN city c1 ON ct.city_departure_id = c1.city_id
             JOIN city c2 ON ct.city_arrival_id = c2.city_id
             JOIN transport t ON ct.transport_id = t.transport_id
-            WHERE c1.name = :city_departure_name AND c2.name = :city_arrival_name AND t.name = :transport_name",
+            WHERE c1.name = :city_departure_name AND c2.name = :city_arrival_name AND t.name = :transport_name 
+            AND ct.departure_time = :departure_time AND ct.arrival_time = :arrival_time",    
             params! {
                 "city_departure_name" => city_departure_name,
                 "city_arrival_name" => city_arrival_name,
@@ -57,6 +58,33 @@ impl City_transport {
                 "transport_name" => transport_name,
             },
         ).unwrap_or(None)
+    }
+
+    pub fn add_city_transport(conn: &mut PooledConn, city_departure_name: &str, city_arrival_name: &str, price: f64, departure_time: NaiveDateTime, arrival_time: NaiveDateTime, transport_name: &str) -> Result<(), mysql::Error> {
+        if !Self::city_transport_exists(conn, city_departure_name, city_arrival_name, transport_name) {
+            if let Some(city_departure_id) = Self::get_city_id(conn, city_departure_name) {
+                if let Some(city_arrival_id) = Self::get_city_id(conn, city_arrival_name) {
+                    if let Some(transport_id) = Self::get_transport_id(conn, transport_name) {
+                        conn.exec_drop(
+                            r"INSERT INTO city_transport (city_departure_id, city_arrival_id, price, departure_time, arrival_time, transport_id)
+                            VALUES (:city_departure_id, :city_arrival_id, :price, :departure_time, :arrival_time, :transport_id)",
+                            params! {
+                                "city_departure_id" => city_departure_id,
+                                "city_arrival_id" => city_arrival_id,
+                                "price" => price,
+                                "departure_time" => departure_time.format("%Y-%m-%d %H:%M:%S").to_string(), //taki format jest rozumiany przez sql
+                                "arrival_time" => arrival_time.format("%Y-%m-%d %H:%M:%S").to_string(),
+                                "transport_id" => transport_id,
+                            }
+                        )?;
+                        println!("City transport from '{}' to '{}' added successfully by '{}'.", city_departure_name, city_arrival_name, transport_name);
+                    }
+                }
+            }
+        } else {
+            println!("City transport from '{}' to '{}' by '{}' already exists!", city_departure_name, city_arrival_name, transport_name);
+        }
+        Ok(())
     }
 }
 
