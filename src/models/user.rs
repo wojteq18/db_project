@@ -25,7 +25,7 @@ impl User {
     }
 
     // Konstruktor nowego użytkownika
-    pub fn new(login: &str, password: &str, status: &str) -> Self {
+    pub fn new(login: &str, password: &str) -> Self {
         let hashed_password = match hash(password, DEFAULT_COST) {
             Ok(h) => h,
             Err(_) => panic!("Failed to hash password"),
@@ -35,7 +35,7 @@ impl User {
             user_id: 0,
             login: login.to_owned(),
             password: hashed_password,
-            status: status.to_owned(),
+            status: "normal".to_owned(),
         }
     }
 
