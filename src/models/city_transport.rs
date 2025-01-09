@@ -28,8 +28,7 @@ impl City_transport {
             JOIN city c1 ON ct.city_departure_id = c1.city_id
             JOIN city c2 ON ct.city_arrival_id = c2.city_id
             JOIN transport t ON ct.transport_id = t.transport_id
-            WHERE c1.name = :city_departure_name AND c2.name = :city_arrival_name AND t.name = :transport_name 
-            AND ct.departure_time = :departure_time AND ct.arrival_time = :arrival_time",    
+            WHERE c1.name = :city_departure_name AND c2.name = :city_arrival_name AND t.name = :transport_name",    
             params! {
                 "city_departure_name" => city_departure_name,
                 "city_arrival_name" => city_arrival_name,

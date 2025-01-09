@@ -4,7 +4,7 @@ mod models;  // Importujemy moduł models.rs
 use mysql::*;
 use mysql::prelude::*;
 use db::connect_to_db;
-use models::user::User; 
+use models::{city_transport::City_transport, user::User}; 
 use models::city::City;
 use models::country::Country;
 use bcrypt::{verify};
@@ -94,7 +94,47 @@ fn main() -> Result<()> {
             },
             _ => println!("Please type a number from 1 to 2")
         }
+    }
 
+    if is_admin == false {
+        let mut is_ended: bool = false;
+
+        while is_ended == false {
+            println!("Choose number of action: ");
+            println!("1. Show connection beetwen cities");
+            println!("2. Show hotels in city");
+            println!("3. Log out");
+
+            let mut action = String::new();
+            std::io::stdin().read_line(&mut action).expect("Failed to read line");
+            let action: i32 = action.trim().parse().expect("Please type a number!");
+
+            match action {
+                1 => {
+                    println!("Type city departure: ");
+                    let mut city_departure = String::new();
+                    std::io::stdin().read_line(&mut city_departure).expect("Failed to read line");
+                    let city_departure: String = city_departure.trim().to_string();
+
+                    println!("Type city arrival: ");
+                    let mut city_arrival = String::new();
+                    std::io::stdin().read_line(&mut city_arrival).expect("Failed to read line");
+                    let city_arrival: String = city_arrival.trim().to_string();
+
+                    println!("Type transport name: ");
+                    let mut transport_name = String::new();
+                    std::io::stdin().read_line(&mut transport_name).expect("Failed to read line");
+                    let transport_name: String = transport_name.trim().to_string();
+
+                    if City_transport::city_transport_exists(&mut conn, &city_departure, &city_arrival, &transport_name) {
+                        println!("Connection between '{}' and '{}' by '{}' exists.", city_departure, city_arrival, transport_name);
+                    } else {
+                        println!("Connection between '{}' and '{}' by '{}' does not exist.", city_departure, city_arrival, transport_name);
+                    }
+                }
+                _ => println!("Please type a number from 1 to 2")
+            }
+        }
     }
     Ok(())
 }
