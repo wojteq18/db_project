@@ -12,82 +12,89 @@ use bcrypt::{verify};
 fn main() -> Result<()> {
     let pool = connect_to_db()?;
     let mut conn = pool.get_conn()?;
-    /*let mut is_logged: bool = false;
-    let mut is_admin: bool;
-    let mut is_end: bool = false;
+    let mut is_logged: bool = false;
+    let mut is_admin: bool = false;
 
     while is_logged == false {
-        println!("You must be logged in to use the application");
-        println!("1: Log in");
-        println!("2: Register");
+        println!("To use application, you have to be logged");
+        println!("Choose number of action:");
+        println!("1. Log in");
+        println!("2. Register");
 
-        let mut choice = String::new();
-        std::io::stdin().read_line(&mut choice).expect("Failed to read line");
-        let choice: i32 = choice.trim().parse().expect("Please type a number!");
+        let mut action = String::new();
+        std::io::stdin().read_line(&mut action).expect("Failed to read line");
+        let action: i32 = action.trim().parse().expect("Please type a number!");
 
-        match choice {
-            1 => {
-                println!("Enter your login: ");
+        match action {
+            1 => { 
+                println!("Type your login: ");
                 let mut login = String::new();
                 std::io::stdin().read_line(&mut login).expect("Failed to read line");
-        
-                println!("Enter your password: ");
+                let login: String = login.trim().parse().expect("Please type a string!");
+
+                println!("Type your password: ");
                 let mut password = String::new();
                 std::io::stdin().read_line(&mut password).expect("Failed to read line");
-                
-                if User::user_exists(&mut conn, &login) {
-                    // Weryfikacja hasła
-                    match verify(&password, &stored_user.password) {
-                        Ok(true) => {
-                            println!("Login successful! Welcome, {}", login);
-                            is_logged = true;
-                            is_admin = stored_user.status == "admin";
+                let password: String = password.trim().parse().expect("Please type a string!");
+
+                if User::user_exists(&mut conn, &login) == true {
+                    // Pobierz dane użytkownika
+                    let query = "SELECT password, status FROM user WHERE login = :login";
+                    let result: Option<(String, String)> = conn.exec_first(
+                        query,
+                        params! {
+                            "login" => &login
                         },
-                        Ok(false) => println!("Invalid password. Try again."),
-                        Err(_) => println!("Error verifying password."),
+                    )?;
+        
+                    match result {
+                        Some((hashed_password, status)) => {
+                            // Weryfikuj hasło
+                            if bcrypt::verify(&password, &hashed_password).unwrap_or(false) {
+                                println!("Login successful!");
+                                is_logged = true;
+        
+                                if status == "admin" {
+                                    println!("Welcome, admin!");
+                                    is_admin = true;
+                                } else {
+                                    println!("Welcome, regular user!");
+                                }
+                            } else {
+                                println!("Invalid password. Please try again.");
+                            }
+                        },
+                        None => {
+                            println!("No user found with the provided login.");
+                        }
                     }
                 } else {
-                    println!("User not found. Please register.");
+                    println!("User '{}' does not exist.", login);
                 }
-            },  // <-- Domykamy blok dla opcji 1
-        
+            },
+
             2 => {
-                println!("Enter your login: ");
+                println!("Type your login: ");
                 let mut login = String::new();
                 std::io::stdin().read_line(&mut login).expect("Failed to read line");
-                
-                println!("Enter your password: ");
+                let login: String = login.trim().to_string();
+
+                println!("Type your password: ");
                 let mut password = String::new();
                 std::io::stdin().read_line(&mut password).expect("Failed to read line");
-        
-                let does_exists = User::user_exists(&mut conn, &login);
-                if does_exists == false {
-                    let user = User::new(&login, &password);
-                    user.add_user(&mut conn);
-                    is_logged = true;
-                } else {
-                    println!("User already exists");
-                    continue;
-                }
-            }
-        }        
-    }
+                let password: String = password.trim().to_string();
 
-    
-    
-    while is_end == false {
-        let mut choice = String::new();
-        println!("Pick what you want to do: ");
-        println!("1. Add user");
-        println!("2. Remove user");
-        println!("3. Change user's status");
-        println!("4. Add city");
-        println!("5. Remove city");
-        println!("6. Add country");
-        println!("7. Remove country");
-        println!("8. Add city transport");
-        println!("9. Remove city transport");
-        println!("10. End program");
-    } */
+                if User::user_exists(&mut conn, &login) == true {
+                    println!("User '{}' already exists!", login);
+                } else {
+                    let user = User::new(&login, &password);
+                    user.add_user(&mut conn)?;
+                    is_logged = true;
+                }
+            },
+            _ => println!("Please type a number from 1 to 2")
+        }
+
+    }
     Ok(())
 }
