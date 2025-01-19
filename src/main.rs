@@ -7,6 +7,7 @@ use db::connect_to_db;
 use models::{city_transport::City_transport, user::User}; 
 use models::city::City;
 use models::country::Country;
+use models::hotel::Hotel;
 use bcrypt::{verify};
 
 fn main() -> Result<()> {
@@ -121,18 +122,40 @@ fn main() -> Result<()> {
                     std::io::stdin().read_line(&mut city_arrival).expect("Failed to read line");
                     let city_arrival: String = city_arrival.trim().to_string();
 
-                    println!("Type transport name: ");
-                    let mut transport_name = String::new();
-                    std::io::stdin().read_line(&mut transport_name).expect("Failed to read line");
-                    let transport_name: String = transport_name.trim().to_string();
-
-                    if City_transport::city_transport_exists(&mut conn, &city_departure, &city_arrival, &transport_name) {
-                        println!("Connection between '{}' and '{}' by '{}' exists.", city_departure, city_arrival, transport_name);
+                    if City_transport::city_transport_exists(&mut conn, &city_departure, &city_arrival) {
+                        City_transport::select_city_transport(&mut conn, &city_departure, &city_arrival)?;
                     } else {
-                        println!("Connection between '{}' and '{}' by '{}' does not exist.", city_departure, city_arrival, transport_name);
+                        println!("Connection between '{}' and '{}' does not exist.", city_departure, city_arrival);
                     }
                 }
-                _ => println!("Please type a number from 1 to 2")
+                2 => {
+                    println!("Type country name: ");
+                    let mut country_name = String::new();
+                    std::io::stdin().read_line(&mut country_name).expect("Failed to read line");
+                    let country_name: String = country_name.trim().to_string();
+
+                    println!("Type city name: ");
+                    let mut city_name = String::new();
+                    std::io::stdin().read_line(&mut city_name).expect("Failed to read line");
+                    let city_name: String = city_name.trim().to_string();
+
+                    if (Country::country_exists(&mut conn, &country_name) == false) {
+                        println!("Country does not exist!");
+                    }
+                    else {
+                        if (City::city_exists(&mut conn, &city_name, &country_name) == false) {
+                            println!("City does not exist!");
+                        }
+                        else {
+                            println!("Hotels in {}, {}", city_name, country_name);
+                            Hotel::select_hotel(&mut conn, &city_name)?;
+                        }
+                    }
+                }
+                3 => {
+                    is_ended = true;
+                }
+                _ => println!("Please type number from 1 to 3")
             }
         }
     }

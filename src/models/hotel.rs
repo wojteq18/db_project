@@ -1,8 +1,9 @@
 use mysql::params;
 use mysql::PooledConn;
 use mysql::prelude::Queryable;
+use serde::Deserialize;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, serde::Deserialize)]
 pub struct Hotel {
     pub hotel_id: i32,
     pub name: String,
@@ -90,6 +91,29 @@ impl Hotel {
             println!("Hotel '{}' removed successfully from '{}'.", hotel_name, city_name);
         } else {
             println!("Hotel '{}' does not exist in '{}'.", hotel_name, city_name);
+        }
+        Ok(())
+    }
+
+    pub fn select_hotel(conn: &mut PooledConn, city_name: &str) -> Result<(), mysql::Error> {
+        // Pobieramy tylko name i rating z bazy danych
+        let hotels: Vec<(String, f64)> = conn.exec(
+            "SELECT h.name, h.rating
+             FROM hotel h
+             JOIN city c ON h.city_id = c.city_id
+             WHERE c.name = :city_name",
+            params! {
+                "city_name" => city_name,
+            },
+        )?;
+    
+        // Jeśli nie znaleziono hoteli, informujemy o tym użytkownika
+        if hotels.is_empty() {
+            println!("No hotels found in '{}'.", city_name);
+        } else {
+            for (name, rating) in hotels {
+                println!("{} - rating: {}", name, rating);
+            }
         }
         Ok(())
     }

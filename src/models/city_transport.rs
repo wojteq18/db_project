@@ -20,7 +20,6 @@ impl City_transport {
         conn: &mut PooledConn,
         city_departure_name: &str,
         city_arrival_name: &str,
-        transport_name: &str
     ) -> bool {
         let exists: Option<String> = conn.exec_first(
             r"SELECT ct.city_transport_id
@@ -28,11 +27,10 @@ impl City_transport {
             JOIN city c1 ON ct.city_departure_id = c1.city_id
             JOIN city c2 ON ct.city_arrival_id = c2.city_id
             JOIN transport t ON ct.transport_id = t.transport_id
-            WHERE c1.name = :city_departure_name AND c2.name = :city_arrival_name AND t.name = :transport_name",    
+            WHERE c1.name = :city_departure_name AND c2.name = :city_arrival_name",    
             params! {
                 "city_departure_name" => city_departure_name,
                 "city_arrival_name" => city_arrival_name,
-                "transport_name" => transport_name,
             },
         ).unwrap_or(None);
     
@@ -60,7 +58,7 @@ impl City_transport {
     }
 
     pub fn add_city_transport(conn: &mut PooledConn, city_departure_name: &str, city_arrival_name: &str, price: f64, departure_time: NaiveDateTime, arrival_time: NaiveDateTime, transport_name: &str) -> Result<(), mysql::Error> {
-        if !Self::city_transport_exists(conn, city_departure_name, city_arrival_name, transport_name) {
+        if !Self::city_transport_exists(conn, city_departure_name, city_arrival_name) {
             if let Some(city_departure_id) = Self::get_city_id(conn, city_departure_name) {
                 if let Some(city_arrival_id) = Self::get_city_id(conn, city_arrival_name) {
                     if let Some(transport_id) = Self::get_transport_id(conn, transport_name) {
@@ -82,6 +80,25 @@ impl City_transport {
             }
         } else {
             println!("City transport from '{}' to '{}' by '{}' already exists!", city_departure_name, city_arrival_name, transport_name);
+        }
+        Ok(())
+    }
+
+    pub fn select_city_transport(conn: &mut PooledConn, city_departure_name: &str, city_arrival_name: &str) -> Result<(), mysql::Error> {
+        let result: Vec<(String, String, f64, NaiveDateTime, NaiveDateTime,String)> = conn.exec(
+            r"SELECT c1.name, c2.name, ct.price, ct.departure_time, ct.arrival_time, t.name
+            FROM city_transport ct
+            JOIN city c1 ON ct.city_departure_id = c1.city_id
+            JOIN city c2 ON ct.city_arrival_id = c2.city_id
+            JOIN transport t ON ct.transport_id = t.transport_id
+            WHERE c1.name = :city_departure_name AND c2.name = :city_arrival_name",
+            params! {
+                "city_departure_name" => city_departure_name,
+                "city_arrival_name" => city_arrival_name,
+            },
+        )?;
+        for (city_departure_name, city_arrival_name, price, departure_time, arrival_time, transport_name) in result {
+            println!("City transport from '{}' to '{}' by '{}' costs {} PLN. Departure time: {}. Arrival time: {}.", city_departure_name, city_arrival_name, transport_name, price, departure_time, arrival_time);
         }
         Ok(())
     }

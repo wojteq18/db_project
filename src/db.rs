@@ -1,10 +1,9 @@
 use mysql::*;
-use mysql::prelude::*;
 use dotenvy::dotenv;
 use std::env;
 
 // Funkcja nawiązująca połączenie
-pub fn connect_to_db() -> Result<Pool> {
+pub fn connect_to_db() -> Result<Pool> { //Pool -> pula zasobów polączeń do bazy danych
     dotenv().ok();
     let database_url = env::var("DATABASE_URL")
         .expect("DATABASE_URL not found in .env file");

@@ -10,12 +10,11 @@ pub struct Country {
 }
 
 impl Country {
-    pub fn country_exists(conn: &mut PooledConn, name: &str, code: &str) -> bool {
+    pub fn country_exists(conn: &mut PooledConn, name: &str) -> bool {
         let exists: Option<String> = conn.exec_first(
-            "SELECT name FROM country WHERE name = :name OR code = :code",
+            "SELECT name FROM country WHERE name = :name",
             params! {
                 "name" => name,
-                "code" => code,
             },
         ).unwrap_or(None);
         exists.is_some()
@@ -30,7 +29,7 @@ impl Country {
     }
 
     pub fn add_country(&self, conn: &mut PooledConn) -> Result<(), mysql::Error> {
-        if Self::country_exists(conn, &self.name, &self.code) == false {
+        if Self::country_exists(conn, &self.name) == false {
             conn.exec_drop(
                 r"INSERT INTO country (name, code)
                 VALUES (:name, :code)",
@@ -47,7 +46,7 @@ impl Country {
     }  
 
     pub fn remove_country(&self, conn: &mut PooledConn) -> Result<(), mysql::Error> {
-        if Self::country_exists(conn, &self.name, &self.code) == true {
+        if Self::country_exists(conn, &self.name) == true {
             conn.exec_drop(
                 r"DELETE FROM country WHERE name = :name AND code = :code",
                 params! {
