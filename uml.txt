@@ -1,0 +1,64 @@
+@startuml
+
+package db_project {
+    class db {
+        +connect_to_db() : Result<Pool>
+    }
+
+    class City {
+        +city_id: i32
+        +name: String
+        +country_name: String
+        +add_city(conn: &mut PooledConn) : Result<(), mysql::Error>
+    }
+
+    class User {
+        +user_id: i32
+        +login: String
+        +password: String
+        +status: String
+        +user_exists(conn: &mut PooledConn, login: &str) : bool
+        +new(login: &str, password: &str) : Self
+        +add_user(conn: &mut PooledConn) : Result<(), mysql::Error>
+        +remove_user(conn: &mut PooledConn) : Result<(), mysql::Error>
+        +promote_user(conn: &mut PooledConn) : Result<(), mysql::Error>
+    }
+
+    class Country {
+        +country_id: i32
+        +name: String
+        +code: String
+    }
+
+    class Hotel {
+        +hotel_id: i32
+        +name: String
+        +city_id: i32
+        +rating: f64
+    }
+
+    class City_transport {
+        +city_transport_id: i32
+        +city_departure_id: i32
+        +city_arrival_id: i32
+        +price: f64
+        +departure_time: NaiveDateTime
+        +arrival_time: NaiveDateTime
+        +transport_id: i32
+        +add_city_transport(conn: &mut PooledConn, city_departure_name: &str, city_arrival_name: &str, price: f64, departure_time: NaiveDateTime, arrival_time: NaiveDateTime, transport_name: &str) : Result<(), mysql::Error>
+        +select_city_transport(conn: &mut PooledConn, city_departure_name: &str, city_arrival_name: &str) : Result<(), mysql::Error>
+    }
+
+    class main {
+        +main() : Result<()>
+    }
+
+    db <|-- main
+    City <|-- main
+    User <|-- main
+    Country <|-- main
+    Hotel <|-- main
+    City_transport <|-- main
+}
+
+@enduml

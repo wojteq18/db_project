@@ -9,9 +9,19 @@ pub struct City_transport {
     pub city_departure_id: i32,
     pub city_arrival_id: i32,
     pub price: f64,
-    pub departure_time: NaiveDateTime,
-    pub arrival_time: NaiveDateTime,
+    pub departure_time: String,
+    pub arrival_time: String,
     transport_id: i32,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct CityTransportResult {
+    pub city_departure_name: String,
+    pub city_arrival_name: String,
+    pub price: f64,
+    pub departure_time: String,
+    pub arrival_time: String,
+    pub transport_name: String,
 }
 
 impl City_transport {
@@ -21,7 +31,7 @@ impl City_transport {
         city_departure_name: &str,
         city_arrival_name: &str,
     ) -> bool {
-        let exists: Option<String> = conn.exec_first(
+        let exists: Option<i32> = conn.exec_first(
             r"SELECT ct.city_transport_id
             FROM city_transport ct
             JOIN city c1 ON ct.city_departure_id = c1.city_id
@@ -85,7 +95,7 @@ impl City_transport {
     }
 
     pub fn select_city_transport(conn: &mut PooledConn, city_departure_name: &str, city_arrival_name: &str) -> Result<(), mysql::Error> {
-        let result: Vec<(String, String, f64, NaiveDateTime, NaiveDateTime,String)> = conn.exec(
+        let result: Vec<(CityTransportResult)> = conn.exec_map(
             r"SELECT c1.name, c2.name, ct.price, ct.departure_time, ct.arrival_time, t.name
             FROM city_transport ct
             JOIN city c1 ON ct.city_departure_id = c1.city_id
@@ -96,11 +106,27 @@ impl City_transport {
                 "city_departure_name" => city_departure_name,
                 "city_arrival_name" => city_arrival_name,
             },
+            |(city_departure_name, city_arrival_name, price, departure_time, arrival_time, transport_name)| CityTransportResult {
+                city_departure_name,
+                city_arrival_name,
+                price,
+                departure_time,
+                arrival_time,
+                transport_name,
+            },
         )?;
-        for (city_departure_name, city_arrival_name, price, departure_time, arrival_time, transport_name) in result {
-            println!("City transport from '{}' to '{}' by '{}' costs {} PLN. Departure time: {}. Arrival time: {}.", city_departure_name, city_arrival_name, transport_name, price, departure_time, arrival_time);
+    
+        for transport in result {
+            println!(
+                "City transport from '{}' to '{}' by '{}' costs {} PLN. Departure time: {}. Arrival time: {}.",
+                transport.city_departure_name,
+                transport.city_arrival_name,
+                transport.transport_name,
+                transport.price,
+                transport.departure_time,
+                transport.arrival_time
+            );
         }
         Ok(())
     }
-}
-
+}    
