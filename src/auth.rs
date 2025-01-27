@@ -41,19 +41,8 @@ impl Auth for AuthService {
         if User::user_exists(conn, &login) {
             println!("User '{}' already exists!", login);
         } else {
-            let hashed_password = hash(&password, 6).expect("Failed to hash password");
-            let status = "user";
-            conn.exec_drop(
-                r"INSERT INTO user (login, password, status)
-                VALUES (:login, :password, :status)",
-                params! {
-                    "login" => &login,
-                    "password" => hashed_password,
-                    "status" => status,
-                },
-            )
-            .expect("Failed to insert user");
-            println!("User '{}' registered successfully!", login);
+            let user = User::new(&login, &password);
+            user.add_user(conn);
         }
     }
 

@@ -9,8 +9,8 @@ pub struct City_transport {
     pub city_departure_id: i32,
     pub city_arrival_id: i32,
     pub price: f64,
-    pub departure_time: String,
-    pub arrival_time: String,
+    pub departure_time: NaiveDateTime,
+    pub arrival_time: NaiveDateTime,
     transport_id: i32,
 }
 
@@ -19,8 +19,8 @@ pub struct CityTransportResult {
     pub city_departure_name: String,
     pub city_arrival_name: String,
     pub price: f64,
-    pub departure_time: String,
-    pub arrival_time: String,
+    pub departure_time: NaiveDateTime,
+    pub arrival_time: NaiveDateTime,
     pub transport_name: String,
 }
 
@@ -94,8 +94,12 @@ impl City_transport {
         Ok(())
     }
 
-    pub fn select_city_transport(conn: &mut PooledConn, city_departure_name: &str, city_arrival_name: &str) -> Result<(), mysql::Error> {
-        let result: Vec<(CityTransportResult)> = conn.exec_map(
+    pub fn select_city_transport(
+        conn: &mut PooledConn,
+        city_departure_name: &str,
+        city_arrival_name: &str,
+    ) -> Result<(), mysql::Error> {
+        let result: Vec<CityTransportResult> = conn.exec_map(
             r"SELECT c1.name, c2.name, ct.price, ct.departure_time, ct.arrival_time, t.name
             FROM city_transport ct
             JOIN city c1 ON ct.city_departure_id = c1.city_id
@@ -106,13 +110,35 @@ impl City_transport {
                 "city_departure_name" => city_departure_name,
                 "city_arrival_name" => city_arrival_name,
             },
-            |(city_departure_name, city_arrival_name, price, departure_time, arrival_time, transport_name)| CityTransportResult {
-                city_departure_name,
-                city_arrival_name,
-                price,
-                departure_time,
-                arrival_time,
-                transport_name,
+            |(city_departure_name, city_arrival_name, price, departure_time, arrival_time, transport_name): (String, String, f64, mysql::Value, mysql::Value, String)| {
+                let departure_time = match departure_time {
+                    mysql::Value::Date(year, month, day, hour, minute, second, _) => {
+                        let naive_date = chrono::NaiveDate::from_ymd_opt(year as i32, month as u32, day as u32)//tworzy date z wartościami ro, miesiąc, dzień
+                            .expect("Invalid departure_time date");
+                        naive_date.and_hms_opt(hour as u32, minute as u32, second as u32)//wzbogaca date o godzine, minute i sekunde tworzac NaiveDateTime
+                            .expect("Invalid departure_time time")
+                    },
+                    _ => panic!("Unexpected type for departure_time"),
+                };
+    
+                let arrival_time = match arrival_time {
+                    mysql::Value::Date(year, month, day, hour, minute, second, _) => {
+                        let naive_date = chrono::NaiveDate::from_ymd_opt(year as i32, month as u32, day as u32)
+                            .expect("Invalid arrival_time date");
+                        naive_date.and_hms_opt(hour as u32, minute as u32, second as u32)
+                            .expect("Invalid arrival_time time")
+                    },
+                    _ => panic!("Unexpected type for arrival_time"),
+                };
+    
+                CityTransportResult {
+                    city_departure_name,
+                    city_arrival_name,
+                    price,
+                    departure_time,
+                    arrival_time,
+                    transport_name,
+                }
             },
         )?;
     
@@ -128,5 +154,5 @@ impl City_transport {
             );
         }
         Ok(())
-    }
+    }    
 }    
