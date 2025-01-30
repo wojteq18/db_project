@@ -2,17 +2,24 @@ use mysql::*;
 use dotenvy::dotenv;
 use std::env;
 
-// Funkcja nawiązująca połączenie
-pub fn connect_to_db() -> Result<Pool> { //Pool -> pula zasobów polączeń do bazy danych
-    dotenv().ok();
-    let database_url = env::var("DATABASE_URL")
-        .expect("DATABASE_URL not found in .env file");
-
-    // Tworzenie opcji połączenia
-    let opts = Opts::from_url(&database_url)
-        .expect("Invalid DATABASE_URL format");
-
-    // Tworzenie puli połączeń
-    let pool = Pool::new(opts)?;
-    Ok(pool)
+pub struct DatabaseConfig {
+    pub readonly_pool: Pool,
+    pub admin_pool: Pool,
 }
+
+pub fn connect_to_db() -> Result<DatabaseConfig> {
+    dotenv().ok(); //ładuje zmienne z pliku env
+    let readonly_url = env::var("DATABASE_READONLY_URL").expect("DATABASE_READONLY_URL not found");
+    let readonly_opts = Opts::from_url(&readonly_url)?; //parsuje url na strukture Opts - wymagane przez biblioteke mysql
+    let readonly_pool = Pool::new(readonly_opts)?; //tworzy pule połączeń
+
+    let admin_url = env::var("DATABASE_ADMIN_URL").expect("DATABASE_ADMIN_URL not found");
+    let admin_opts = Opts::from_url(&admin_url)?;
+    let admin_pool = Pool::new(admin_opts)?;
+
+    Ok(DatabaseConfig { //w przypadku sukcesu zwraca pule polaczen
+        readonly_pool,
+        admin_pool,
+    })
+}
+

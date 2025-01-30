@@ -1,5 +1,4 @@
 use mysql::*;
-use mysql::prelude::*;
 use crate::models::{city_transport::City_transport, city::City, country::Country, hotel::Hotel};
 
 pub trait UserActions {

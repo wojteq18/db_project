@@ -1,9 +1,8 @@
 use mysql::params;
 use mysql::PooledConn;
 use mysql::prelude::Queryable;
-use serde::Deserialize;
 
-#[derive(Debug, PartialEq, Eq, serde::Deserialize)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Hotel {
     pub hotel_id: i32,
     pub name: String,

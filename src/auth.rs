@@ -1,9 +1,6 @@
-use std::result;
-use std::option;
-
 use mysql::*;
 use mysql::prelude::*;
-use bcrypt::{hash, verify};
+use bcrypt::{verify};
 use crate::models::user::User;
 
 pub trait Auth {

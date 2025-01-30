@@ -1,6 +1,6 @@
 use mysql::*;
 use mysql::prelude::*;
-use crate::models::{city::{self, City}, city_transport::City_transport, country::{self, Country}, hotel::Hotel};
+use crate::models::{city::{City}, city_transport::City_transport, country::{Country}, hotel::Hotel, user::User};
 use chrono::NaiveDateTime;
 
 
@@ -12,7 +12,7 @@ pub trait AdminActions {
     fn remove_city(conn: &mut PooledConn);
     fn remove_country(conn: &mut PooledConn);
     fn remove_hotel(conn: &mut PooledConn);
-    //TODO add remove fuction
+    fn promote_user(conn: &mut PooledConn);
 }
 
 pub struct Admin;
@@ -49,7 +49,7 @@ impl AdminActions for Admin {
         if Hotel::hotel_exists(conn, &hotel_name, &city_name) {
             println!("Hotel '{}' already exists!", hotel_name);
         } else {
-            if let Some(hotel) = Hotel::new(conn, &hotel_name, &city_name, hotel_rating) {
+            if let Some(_hotel) = Hotel::new(conn, &hotel_name, &city_name, hotel_rating) {
                 Hotel::add_hotel(conn, &hotel_name, &city_name, hotel_rating).expect("Failed to add hotel");
             } else {
                 println!("Error: City '{}' not found.", city_name);
@@ -64,24 +64,16 @@ impl AdminActions for Admin {
         let departure_time = get_date();
         let arrival_time = get_date();
     
-        // Sprawdzenie, czy transport już istnieje
-        if City_transport::city_transport_exists(conn, &city_departure_name, &city_arrival_name) {
-            println!(
-                "City transport from '{}' to '{}' by '{}' already exists!",
-                city_departure_name, city_arrival_name, transport_name
-            );
-            } else {
             // Dodanie nowego transportu
-            City_transport::add_city_transport(
-                conn,
-                &city_departure_name,
-                &city_arrival_name,
-                price,
-                departure_time,
-                arrival_time,
-                &transport_name,
-            ).expect("Failed to add city transport"); 
-        }
+        City_transport::add_city_transport(
+            conn,
+            &city_departure_name,
+            &city_arrival_name,
+            price,
+            departure_time,
+            arrival_time,
+            &transport_name,
+        ).expect("Failed to add city transport"); 
     }
     
 
@@ -114,6 +106,17 @@ impl AdminActions for Admin {
             Hotel::remove_hotel(conn, &hotel_name, &city_name).expect("Failed to remove hotel");
         } else {
             println!("Hotel '{}' does not exist!", hotel_name);
+        }
+    }
+
+    fn promote_user(conn: &mut PooledConn) {
+        let user_name = get_user();
+        if User::user_exists(conn, &user_name) {
+            let user = User::new(&user_name, "password");
+            user.promote_user(conn).expect("Failed to promote user");
+            println!("User '{}' promoted to admin!", user_name);
+        } else {
+            println!("User '{}' does not exist!", user_name);
         }
     }
 }
@@ -201,5 +204,16 @@ fn get_date() -> NaiveDateTime { //funkcja pobierająca date
         .expect("Invalid date format!");
 
     return date
+
+}
+
+fn get_user() -> String { //funkcja pobierająca nazwe użytkownika
+
+    println!("Type user name: ");
+    let mut user_name = String::new();
+    std::io::stdin().read_line(&mut user_name).expect("Failed to read line");
+    let user_name = user_name.trim().to_string();
+
+    return user_name
 
 }
