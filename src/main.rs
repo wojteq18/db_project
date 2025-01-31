@@ -8,6 +8,8 @@ use possibilities::user_actions::{UserActions, NormalUser};
 use possibilities::admin_actions::{AdminActions, Admin};
 use auth::{Auth, AuthService};
 
+//derive(Debug)]
+
 fn main() -> Result<()> {
     let db_config = db::connect_to_db()?;
     let mut is_logged = false;
@@ -34,7 +36,7 @@ fn main() -> Result<()> {
             2 =>  {
                 current_conn = Some(db_config.readonly_pool.get_conn()?);
 
-                AuthService::register(current_conn.as_mut().unwrap())
+                AuthService::register(current_conn.as_mut().unwrap())                
             }
             _ => println!("Please type a number from 1 to 2"),
         }

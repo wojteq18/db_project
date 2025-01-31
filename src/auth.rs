@@ -39,7 +39,7 @@ impl Auth for AuthService {
             println!("User '{}' already exists!", login);
         } else {
             let user = User::new(&login, &password);
-            user.add_user(conn);
+            user.add_user(conn).expect("failes to add user");
         }
     }
 
