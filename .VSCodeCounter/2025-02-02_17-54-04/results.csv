@@ -1,0 +1,14 @@
+"filename", "language", "Rust", "comment", "blank", "total"
+"/home/vostok/DB/db_project/src/auth.rs", "Rust", 80, 1, 13, 94
+"/home/vostok/DB/db_project/src/db.rs", "Rust", 20, 0, 6, 26
+"/home/vostok/DB/db_project/src/main.rs", "Rust", 93, 2, 13, 108
+"/home/vostok/DB/db_project/src/models/city.rs", "Rust", 76, 5, 8, 89
+"/home/vostok/DB/db_project/src/models/city_transport.rs", "Rust", 140, 3, 11, 154
+"/home/vostok/DB/db_project/src/models/country.rs", "Rust", 58, 0, 6, 64
+"/home/vostok/DB/db_project/src/models/hotel.rs", "Rust", 107, 2, 11, 120
+"/home/vostok/DB/db_project/src/models/mod.rs", "Rust", 5, 0, 0, 5
+"/home/vostok/DB/db_project/src/models/user.rs", "Rust", 79, 5, 9, 93
+"/home/vostok/DB/db_project/src/possibilities/admin_actions.rs", "Rust", 169, 1, 52, 222
+"/home/vostok/DB/db_project/src/possibilities/mod.rs", "Rust", 2, 0, 0, 2
+"/home/vostok/DB/db_project/src/possibilities/user_actions.rs", "Rust", 42, 0, 10, 52
+"Total", "-", 871, 19, 139, 1029

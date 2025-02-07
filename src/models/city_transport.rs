@@ -68,7 +68,6 @@ impl City_transport {
     }
 
     pub fn add_city_transport(conn: &mut PooledConn, city_departure_name: &str, city_arrival_name: &str, price: f64, departure_time: NaiveDateTime, arrival_time: NaiveDateTime, transport_name: &str) -> Result<(), mysql::Error> {
-        if !Self::city_transport_exists(conn, city_departure_name, city_arrival_name) {
             if let Some(city_departure_id) = Self::get_city_id(conn, city_departure_name) {
                 if let Some(city_arrival_id) = Self::get_city_id(conn, city_arrival_name) {
                     if let Some(transport_id) = Self::get_transport_id(conn, transport_name) {
@@ -88,9 +87,6 @@ impl City_transport {
                     }
                 }
             }
-        } else {
-            println!("City transport from '{}' to '{}' by '{}' already exists!", city_departure_name, city_arrival_name, transport_name);
-        }
         Ok(())
     }
 

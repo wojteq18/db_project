@@ -57,7 +57,9 @@ impl AdminActions for Admin {
         }
     }
     fn add_city_transport(conn: &mut PooledConn) {
+        print!("Deaprture: ");
         let city_departure_name = get_city();
+        print!("Arrival: ");
         let city_arrival_name = get_city();
         let transport_name = get_transport();
         let price = get_price();
